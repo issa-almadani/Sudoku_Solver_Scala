@@ -18,7 +18,7 @@ type Choices = List[Char]
 
 /** Groups list into a list of lists based on the boarsize
  *
- *  @matrix: list to group into smaller lists
+ *  @lst: list to group into smaller lists
  *  @return: list of lists of size boardsize
  */
 def group[T](lst: List[T]): List[List[T]] = lst.grouped(Globals.boxsize).toList
@@ -26,16 +26,16 @@ def group[T](lst: List[T]): List[List[T]] = lst.grouped(Globals.boxsize).toList
 
 /** Merges list of lists into a single List
  *
- *  @matrix: list of lists to merge 
+ *  @lst: list of lists to merge 
  *  @return: list of all merged elements
  */
-def ungroup[T](lst: List[List[T]]): List[T] = lst.foldRight(Nil)((acc, next) => next:::acc)
+def ungroup[T](lst: List[List[T]]): List[T] = lst.flatten
 
 
 /** Checks that a list has no duplicate elements
  *
- *  @matrix: list to verify for uniqueness
- *  @return: True if all elements unique
+ *  @lst: list to verify for uniqueness
+ *  @return: True if all elements unique else False
  */
 def nodups[T](lst: List[T]): Boolean =lst match
   case Nil => true
@@ -96,6 +96,7 @@ def cp[T](lst: List[List[T]]): List[List[T]] = lst match
   } yield x::ys
 
 
+  // FIX
 def mcp[T](matrix: Matrix[List[T]]): List[Matrix[T]] = cp(matrix.map(cp))
 
 
@@ -132,7 +133,7 @@ def safe(cm: Matrix[Choices]): Boolean = rows(cm).forall((c: List[Choices]) => n
   || boxs(cm).forall((c: List[Choices]) => nodups(fixed(c))) 
 
 
-def void(cm: Matrix[Choices]): Boolean = cm.exists(_.exists(_.length == 0))
+def void(cm: Matrix[Choices]): Boolean = cm.exists(_.exists(_.isEmpty))
 
 
 def blocked(cm: Matrix[Choices]): Boolean = void(cm) || !safe(cm)
@@ -159,7 +160,7 @@ def search(cm: Matrix[Choices]): List[Matrix[Choices]] =
     else ungroup(expand(cm).map((cs: Matrix[Choices]) => search(prune(cs))))
 
 
-def sudoku_v3(board: Board): List[Board] = search(prune(choices(board))).map(_.map(_.head))
+def sudoku_v3(board: Board): List[Board] = search(prune(choices(board))).map(_.map(_.map(_.head)))
 
 
 def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) => 
