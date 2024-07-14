@@ -82,9 +82,19 @@ def correct(board: Board): Boolean =
   r.forall(nodups) && c.forall(nodups) && b.forall(nodups)
 
 
+/** Chooses possible values for a given cell based on the character currently in it
+ *
+ *  @board: Character inside given cell
+ *  @return: List of possible choices to fill in Cell (if cell already filled, then the choice is the character already in it)
+ */
 def choose(e: Char): List[Char] = if e == Globals.blank then Globals.cellvals.toList else e::Nil
 
 
+/** This function replaces blank entries in the board with a list of possible choices
+ *
+ *  @board: Sudoku Board
+ *  @return: Sudoku board with cells filled with a list of character choices instead of just characters 
+ */
 def choices(board: Board): Matrix[Choices] = board.map(_.map(choose))
 
 
@@ -106,6 +116,11 @@ def sudoku_v1(board: Board): List[Board] = mcp(choices(board)).filter(correct)
 /* VERSION 2 */
 
 
+/** This function tests whether a list is a singleton - containing only 1 element 
+ *
+ *  @board: list to test
+ *  @return: boolean indicating if singleton list  
+ */
 def single[T](lst: List[T]): Boolean = lst.length == 1
 
 
@@ -142,14 +157,27 @@ def blocked(cm: Matrix[Choices]): Boolean = void(cm) || !safe(cm)
 def minchoice(cm: Matrix[Choices]): Int = ungroup(cm.map(_.map(_.length))).filter(_ > 1).min
 
 
-def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = 
-    val n = minchoice(cm)
+// def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = 
+//     val n = minchoice(cm)
 
-    val (rows1, row::rows2) = cm.span(_.length == n): @unchecked
-    val (row1, cs::row2) = row.span(_.length == n): @unchecked
+//     val (rows1, row::rows2) = cm.span(_.length == n): @unchecked
+//     val (row1, cs::row2) = row.span(_.length == n): @unchecked
 
-    for (c <- cs) yield rows1:::List(row1:::List(c)::row2):::rows2
+//     for (c <- cs) yield rows1:::List(row1:::List(c)::row2):::rows2
   
+def search(rows1: Matrix[Choices], row1: List[Choices], c: Choices, row2: List[Choices], rows2: Matrix[Choices], param: Int): List[Matrix[Choices]] = if c.size == param then 
+    for {
+        cs <- c
+    } yield rows1 ::: List(row1 ::: (List(cs) :: row2)) ::: rows2
+    else 
+    (rows1, row1, c, row2, rows2) match 
+    case (rows1, row1, c, row2_hd :: row2_tl, rows2) => search(rows1, row1 ::: List(c), row2_hd, row2_tl, rows2, param)
+    case (rows1, row1, c, Nil, (hd :: tl1) :: tl2) => search(rows1 ::: List(row1 ::: List(c)), Nil, hd, tl1, tl2, param)
+    case _ => throw new Exception("Should never get here")
+
+def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = cm match
+    case (hd :: tl1) :: tl2 => search(Nil, Nil, hd, tl1, tl2, cm.flatten.map(_.size).min)
+    case _ => throw new Exception("Should never get here")
 
 def mcp_new(matrix: Matrix[Choices]): List[Matrix[Choices]] = ungroup(expand(matrix).map(mcp_new))
 
@@ -233,8 +261,8 @@ def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) =>
           else
             print("Is this correct? (Y/n): ")
 
-        showBoard(sudoku_v3(board).head)
-
+        val x = sudoku_v3(board)
+        print("hi\n")
     } else {
 
     }
