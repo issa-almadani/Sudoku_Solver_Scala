@@ -1,5 +1,7 @@
 
-/* PART 0: GLOBAL / TYPE DEFINIITIONS */
+/* PART 0: GLOBAL / TYPE DEFINIITIONS / IMPORTS */
+
+import scala.io.StdIn.readLine
 
 object Globals {
   var boardsize: Int = 9
@@ -160,18 +162,79 @@ def search(cm: Matrix[Choices]): List[Matrix[Choices]] =
 def sudoku_v3(board: Board): List[Board] = search(prune(choices(board))).map(_.map(_.head))
 
 
-@main def sudoku(input: String = "", boardsize: Int = 9, boxsize: Int = 3, cellvals: String = "123456789", blank: String = "."): Unit =
+def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) => 
+  if idx % Globals.boxsize == 0 then print("\n")
+  
+  row.zipWithIndex.foreach { case (e, idx) => 
+    if idx % Globals.boxsize == 0 then print(" ")
+    print(s"$e ")
+  }
+  print("\n")
+}
+
+
+@main def sudoku(boardsize: Int, boxsize: Int, cellvals: String, blank: String, input: String): Unit =
   Globals.boardsize = boardsize
   Globals.boxsize = boxsize
   Globals.cellvals = cellvals
   Globals.blank = blank.head
 
-  if input.isEmpty() 
-  then 
-    {
+  if (input == "None") then {
+      println("Welcome to Sudoku Solver")
+      println("Please input a Sudoku game to solve:")
+      println("Example:")
+      println(". . .    . . .    2 . .")
+      println(". 8 .    . . 7    . 9 .")
+      println("6 . 2    . . .    5 . .\n")
+
+      println(". 7 .    . 6 .    . . .")
+      println(". . .    9 . 1    . . .")
+      println(". . .    . 2 .    . 4 .\n")
+
+      println(". . 5    . . .    6 . 3")
+      println(". 9 .    4 . .    . 7 .")
+      println(". . 6    . . .    . . .\n")
+      println("Remember to use the boardsize, boxsize, cellvals, and blank character that you input into the program.")
+      println("This example is based on a basic Sudoku input.\n")
+
+      var board: Board = Nil
+      var input: Boolean = true
+      var done: Boolean = false
+
+      while input do
+        println("Please input Sudoku board to solve.\n")
+        board = Nil
+
+        while board.length < Globals.boardsize do
+          val row = readLine().replaceAll("\\s+", "").toList
+          if row.length != Globals.boardsize then 
+            println(s"Reinput row, received row size ${row.length}, expected ${Globals.boardsize}.")
+          else if !(row.toSet -- (Globals.blank::Globals.cellvals.toList).toSet).isEmpty then 
+            println("Reinput row, received row with extraneous character(s): " +
+              s"${(row.toSet -- (Globals.blank::Globals.cellvals.toList).toSet).toList.mkString(" ")}, " +
+              s"please use cellvals or blank characters only: ${(Globals.blank::Globals.cellvals.toList).mkString(" ")}")
+          else 
+            board = board:::List(row)
+
+        println("\n\nThe board you inputed is:")
+        showBoard(board)
+
+        print("\nIs this correct? (Y/n): ")
+        done = false
+        while !done do
+          val response = readLine()
+          
+          if response == "Y" then 
+            done = true
+            input = false
+          else if response == "n" then
+            done = true
+          else
+            print("Is this correct? (Y/n): ")
+
+        showBoard(sudoku_v3(board).head)
+
+    } else {
 
     }
-  else 
-    {
       
-    }
