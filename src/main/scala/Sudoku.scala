@@ -1,7 +1,10 @@
 
 /* PART 0: GLOBAL / TYPE DEFINIITIONS / IMPORTS */
+package Sudoku
 
 import scala.io.StdIn.readLine
+import scala.io.Source
+import mainargs.{main, arg, ParserForMethods, Flag}
 
 object Globals {
   var boardsize: Int = 9
@@ -16,7 +19,7 @@ type Choices = List[Char]
 
 /* PART 1: HELPERS */
 
-/** Groups list into a list of lists based on the boarsize
+/** Groups list into a list of lists based on the boardsize
  *
  *  @lst: list to group into smaller lists
  *  @return: list of lists of size boardsize
@@ -110,6 +113,11 @@ def cp[T](lst: List[List[T]]): List[List[T]] = lst match
 def mcp[T](matrix: Matrix[List[T]]): List[Matrix[T]] = cp(matrix.map(cp))
 
 
+/** This is the first version of Sudoku that solves the board by computing every possible board via the matrix cartesian product and filtering for correct solutions
+ *
+ *  @matrix: board to solve 
+ *  @return: list of correct solutions for the given board
+ */
 def sudoku_v1(board: Board): List[Board] = mcp(choices(board)).filter(correct)
 
 
@@ -140,6 +148,11 @@ def fixed(choices: List[Choices]): Choices = ungroup(choices.filter(single))
 def reduce(css: List[Choices]): List[Choices] = css.map((cs: Choices) => if single(cs) then cs else cs.diff(fixed(css)))
  
 
+/** This helper function produces a new function that operates on a matrix of choices to apply the reduce operation
+ *
+ *  @fn: function to transform matrix before performing the reduce operation
+ *  @return: anonymous function that can take in a matrix and perform the reduction from the given operation
+ */
 def pruneBy(fn: Matrix[Choices] => Matrix[Choices]): Matrix[Choices] => Matrix[Choices] = 
   (x: Matrix[Choices]) => fn(fn(x).map(reduce))
 
@@ -152,6 +165,11 @@ def pruneBy(fn: Matrix[Choices] => Matrix[Choices]): Matrix[Choices] => Matrix[C
 def prune(matrix: Matrix[Choices]): Matrix[Choices] = pruneBy(boxs)(pruneBy(cols)(pruneBy(rows)(matrix)))
 
 
+/** This is the second version of Sudoku that prunes the board once based on illegal choices before computing the matrix cartesian product
+ *
+ *  @matrix: board to solve 
+ *  @return: list of correct solutions for the given board
+ */
 def sudoku_v2(board: Board): List[Board] = mcp(prune(choices(board))).filter(correct)
 
 
@@ -218,10 +236,20 @@ def search(cm: Matrix[Choices]): List[Matrix[Choices]] =
     else ungroup(expand(cm).map((cs: Matrix[Choices]) => search(prune(cs))))
 
 
+/** This is the third version of Sudoku that recursively prunes and expands the board based on entries with the minimum number of choices
+ *
+ *  @matrix: board to solve 
+ *  @return: list of correct solutions for the given board
+ */  
 def sudoku_v3(board: Board): List[Board] = search(prune(choices(board))).map(_.map(_.map(_.head)))
 
 
-def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) => 
+
+/** This helper function prints out a given board to the standard output
+ *
+ *  @board: board to print 
+ */  
+def showBoard(board: Board): Unit = board.zipWithIndex.foreach { case (row, idx) => 
   if idx % Globals.boxsize == 0 then print("\n")
   
   row.zipWithIndex.foreach { case (e, idx) => 
@@ -232,74 +260,48 @@ def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) =>
 }
 
 
-@main def sudoku(boardsize: Int, boxsize: Int, cellvals: String, blank: String, input: String): Unit =
+def readBoard(path: String): Board = 
+  val source = Source.fromFile(path)
+  val string = source.mkString.replaceAll("\\s+", "").toList
+  source.close()
+  string.take(Globals.boardsize * Globals.boardsize).grouped(Globals.boardsize).toList
+
+
+def sudoku(boardsize: Int, boxsize: Int, cellvals: String, blank: String, input: String, output: String, max_solution_num: Int): Unit =
   Globals.boardsize = boardsize
   Globals.boxsize = boxsize
   Globals.cellvals = cellvals
   Globals.blank = blank.head
 
-  if (input == "None") then {
-      println("Welcome to Sudoku Solver")
-      println("Please input a Sudoku game to solve:")
-      println("Example:")
-      println(". . .    . . .    2 . .")
-      println(". 8 .    . . 7    . 9 .")
-      println("6 . 2    . . .    5 . .\n")
-
-      println(". 7 .    . 6 .    . . .")
-      println(". . .    9 . 1    . . .")
-      println(". . .    . 2 .    . 4 .\n")
-
-      println(". . 5    . . .    6 . 3")
-      println(". 9 .    4 . .    . 7 .")
-      println(". . 6    . . .    . . .\n")
-      println("Remember to use the boardsize, boxsize, cellvals, and blank character that you input into the program.")
-      println("This example is based on a basic Sudoku input.\n")
-
-      var board: Board = Nil
-      var input: Boolean = true
-      var done: Boolean = false
-
-      while input do
-        println("Please input Sudoku board to solve.\n")
-        board = Nil
-
-        while board.length < Globals.boardsize do
-          val row = readLine().replaceAll("\\s+", "").toList
-          if row.length != Globals.boardsize then 
-            println(s"Reinput row, received row size ${row.length}, expected ${Globals.boardsize}.")
-          else if !(row.toSet -- (Globals.blank::Globals.cellvals.toList).toSet).isEmpty then 
-            println("Reinput row, received row with extraneous character(s): " +
-              s"${(row.toSet -- (Globals.blank::Globals.cellvals.toList).toSet).toList.mkString(" ")}, " +
-              s"please use cellvals or blank characters only: ${(Globals.blank::Globals.cellvals.toList).mkString(" ")}")
-          else 
-            board = board:::List(row)
-
-        println("\n\nThe board you inputed is:")
-        showBoard(board)
-
-        print("\nIs this correct? (Y/n): ")
-        done = false
-        while !done do
-          val response = readLine()
-          
-          if response == "Y" then 
-            done = true
-            input = false
-          else if response == "n" then
-            done = true
-          else
-            print("Is this correct? (Y/n): ")
-
-        val x = sudoku_v3(board)
-
-        println(s"\n Solutions Found: ${x.length}\n")
-
-        if (x.length > 0)
-          println("Sample Solution:")
-          showBoard(x.head)
-
-    } else {
-
-    }
+  try 
+    val board = readBoard(input)
+    val solutions = sudoku_v3(board)
       
+    println(s"\nSolutions Found: ${solutions.length}\n")
+    if (solutions.length > 0)
+      println("Sample Solution:")
+      showBoard(solutions.head)
+
+  catch 
+    case ex: Exception => println(s"An error occurred: ${ex.getMessage}")
+    
+
+object Sudoku{
+  @main
+  def run(@arg(doc = "Dimensions of board, should be a square number (Default = 9)")
+          boardsize: Int = 9,
+          @arg(doc = "Dimensions of box, should be square root of boardsize (Default = 3)")
+          boxsize: Int = 3,
+          @arg(doc = "Possible characters to use in board (Default = '123456789')")
+          cellvals: String = "123456789",
+          @arg(doc = "Blank character for blank entries (Default = '.')")
+          blank: String = ".",
+          @arg(short = 'i', doc = "Path to file containing input board (Default = './sample/test.txt') (flag: -i)")
+          input: String = "./sample/test.txt",
+          @arg(short = 'o', doc = "Optional path to file to store output solutions (Default = prints to standard output) (flag: -o)")
+          output: String = "",
+          @arg(short = 'm', doc = "Maximum number of solutions to return (Default = 1) (flag: -m)")
+          max_solution_num: Int = 1) = sudoku(boardsize, boxsize, cellvals, blank, input, output, max_solution_num)
+  
+  def main(args: Array[String]): Unit = ParserForMethods(this).runOrExit(args)
+}

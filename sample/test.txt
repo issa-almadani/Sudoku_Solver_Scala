@@ -1,0 +1,16 @@
+. . .    . . .    2 . .
+. 8 .    . . 7    . 9 .
+6 . 2    . . .    5 . .
+. 7 .    . 6 .    . . .
+. . .    9 . 1    . . .
+. . .    . 2 .    . 4 .
+. . 5    . . .    6 . 3
+. 9 .    4 . .    . 7 .
+. . 6    . . .    . . .
+
+Usage Note:
+- input board in any format you like (with/without spaces or lines)
+- the program will be able to parse the board so long as it conforms to the correct boardsize and cellvals
+- whitespaces will be correctly ignored if written within bounds to be read in
+- anything written beyond the boardsize limit (such as these comments) will be ignored
+- the program will read only until the board is fully loaded in
