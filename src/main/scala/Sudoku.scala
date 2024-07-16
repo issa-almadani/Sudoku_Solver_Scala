@@ -84,7 +84,7 @@ def correct(board: Board): Boolean =
 
 /** Chooses possible values for a given cell based on the character currently in it
  *
- *  @board: Character inside given cell
+ *  @e: Character inside given cell
  *  @return: List of possible choices to fill in Cell (if cell already filled, then the choice is the character already in it)
  */
 def choose(e: Char): List[Char] = if e == Globals.blank then Globals.cellvals.toList else e::Nil
@@ -118,15 +118,25 @@ def sudoku_v1(board: Board): List[Board] = mcp(choices(board)).filter(correct)
 
 /** This function tests whether a list is a singleton - containing only 1 element 
  *
- *  @board: list to test
+ *  @lst: list to test
  *  @return: boolean indicating if singleton list  
  */
 def single[T](lst: List[T]): Boolean = lst.length == 1
 
 
+/** This takes in a list of choices and returns the fixed entries in that list
+ *
+ *  @choices: list to check for fixed entries
+ *  @return: fixed entries of list
+ */
 def fixed(choices: List[Choices]): Choices = ungroup(choices.filter(single))
 
 
+/** This takes in a list of choices and reduces the possible choices in certain entries based on fixed entries
+ *
+ *  @css: list to refine based on fixed entries
+ *  @return: refined list of choices
+ */
 def reduce(css: List[Choices]): List[Choices] = css.map((cs: Choices) => if single(cs) then cs else cs.diff(fixed(css)))
  
 
@@ -134,6 +144,11 @@ def pruneBy(fn: Matrix[Choices] => Matrix[Choices]): Matrix[Choices] => Matrix[C
   (x: Matrix[Choices]) => fn(fn(x).map(reduce))
 
 
+/** This function removes fixed choices from rows, columns, and boxes
+ *
+ *  @matrix: Matrix of choices to refine 
+ *  @return: refined matrix of choices
+ */
 def prune(matrix: Matrix[Choices]): Matrix[Choices] = pruneBy(boxs)(pruneBy(cols)(pruneBy(rows)(matrix)))
 
 
@@ -143,11 +158,21 @@ def sudoku_v2(board: Board): List[Board] = mcp(prune(choices(board))).filter(cor
 /* VERSION 3 */
 
 
+/** This function checks if the fixed choices of the matrix are unique, meaning it is a viable candidate for a solution
+ *
+ *  @cm: Matrix of choices to check 
+ *  @return: boolean representing if the matrix is safe
+ */
 def safe(cm: Matrix[Choices]): Boolean = rows(cm).forall((c: List[Choices]) => nodups(fixed(c))) 
-  || cols(cm).forall((c: List[Choices]) => nodups(fixed(c))) 
-  || boxs(cm).forall((c: List[Choices]) => nodups(fixed(c))) 
+  && cols(cm).forall((c: List[Choices]) => nodups(fixed(c))) 
+  && boxs(cm).forall((c: List[Choices]) => nodups(fixed(c))) 
 
 
+/** This function checks for matrices where one entry has no possible choices left, meaning it can never lead to a solution
+ *
+ *  @cm: Matrix of choices to check 
+ *  @return: boolean representing if the matrix has a void entry
+ */
 def void(cm: Matrix[Choices]): Boolean = cm.exists(_.exists(_.isEmpty))
 
 
@@ -157,27 +182,14 @@ def blocked(cm: Matrix[Choices]): Boolean = void(cm) || !safe(cm)
 def minchoice(cm: Matrix[Choices]): Int = ungroup(cm.map(_.map(_.length))).filter(_ > 1).min
 
 
-// def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = 
-//     val n = minchoice(cm)
+def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = 
+    val n = minchoice(cm)
 
-//     val (rows1, row::rows2) = cm.span(_.length == n): @unchecked
-//     val (row1, cs::row2) = row.span(_.length == n): @unchecked
+    val (rows1, row::rows2) = cm.span(_.forall(_.length != n)): @unchecked
+    val (row1, cs::row2) = row.span(_.length != n): @unchecked
 
-//     for (c <- cs) yield rows1:::List(row1:::List(c)::row2):::rows2
+    for (c <- cs) yield rows1:::List(row1:::List(c)::row2):::rows2
   
-def search(rows1: Matrix[Choices], row1: List[Choices], c: Choices, row2: List[Choices], rows2: Matrix[Choices], param: Int): List[Matrix[Choices]] = if c.size == param then 
-    for {
-        cs <- c
-    } yield rows1 ::: List(row1 ::: (List(cs) :: row2)) ::: rows2
-    else 
-    (rows1, row1, c, row2, rows2) match 
-    case (rows1, row1, c, row2_hd :: row2_tl, rows2) => search(rows1, row1 ::: List(c), row2_hd, row2_tl, rows2, param)
-    case (rows1, row1, c, Nil, (hd :: tl1) :: tl2) => search(rows1 ::: List(row1 ::: List(c)), Nil, hd, tl1, tl2, param)
-    case _ => throw new Exception("Should never get here")
-
-def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = cm match
-    case (hd :: tl1) :: tl2 => search(Nil, Nil, hd, tl1, tl2, cm.flatten.map(_.size).min)
-    case _ => throw new Exception("Should never get here")
 
 def mcp_new(matrix: Matrix[Choices]): List[Matrix[Choices]] = ungroup(expand(matrix).map(mcp_new))
 
@@ -262,7 +274,11 @@ def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) =>
             print("Is this correct? (Y/n): ")
 
         val x = sudoku_v3(board)
-        print("hi\n")
+
+        println(s"\n Solutions Found: ${x.length}\n")
+        println("Sample Solution:")
+
+        showBoard(x.head)
     } else {
 
     }

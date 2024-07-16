@@ -114,6 +114,45 @@ class MySuite extends munit.FunSuite {
                                     "123578".toList, "135789".toList, "23589".toList, 
                                     "1489".toList, "1258".toList, "124589".toList))
 
+  val test_expand = List(List(List(1), List(3, 4, 5), List(3, 4, 7, 9), 
+                         List(3, 5, 6, 8), List(3, 4, 5, 8, 9), List(3, 4, 5, 6, 8, 9), 
+                         List(2), List(3, 6, 8), List(4, 6, 7, 8)), 
+
+                    List(List(3, 4, 5), List(8), List(3, 4), 
+                         List(1, 2, 3, 5, 6), List(1, 3, 4, 5), List(7), 
+                         List(1, 3, 4), List(9), List(1, 4, 6)), 
+
+                    List(List(6), List(3, 4), List(2), 
+                         List(1, 3, 8), List(1, 3, 4, 8, 9), List(3, 4, 8, 9), 
+                         List(5), List(1, 3, 8), List(1, 4, 7, 8)), 
+
+                    List(List(2, 3, 4, 5, 8, 9), List(7), List(1, 3, 4, 8, 9), 
+                         List(3, 5, 8), List(6), List(3, 4, 5, 8), 
+                         List(1, 3, 8, 9), List(1, 2, 3, 5, 8), List(1, 2, 5, 8, 9)), 
+
+                    List(List(2, 3, 4, 5, 8), List(2, 3, 4, 5, 6), List(3, 4, 8), 
+                         List(9), List(3, 4, 5, 7, 8), List(1), 
+                         List(3, 7, 8), List(2, 3, 5, 6, 8), List(2, 5, 6, 7, 8)), 
+
+                    List(List(3, 5, 8, 9), List(1, 3, 5, 6), List(1, 3, 8, 9), 
+                         List(3, 5, 7, 8), List(2), List(3, 5, 8), 
+                         List(1, 3, 7, 8, 9), List(4), List(1, 5, 6, 7, 8, 9)), 
+
+                    List(List(2, 4, 7, 8), List(1, 2, 4), List(5), 
+                         List(1, 2, 7, 8), List(1, 7, 8, 9), List(2, 8, 9), 
+                         List(6), List(1, 2, 8), List(3)), 
+
+                    List(List(2, 3, 8), List(9), List(1, 3, 8), 
+                         List(4), List(1, 3, 5, 8), List(2, 3, 5, 6, 8), 
+                         List(1, 8), List(7), List(1, 2, 5, 8)), 
+
+                    List(List(2, 3, 4, 7, 8), List(1, 2, 3, 4), List(6), 
+                         List(1, 2, 3, 5, 7, 8), List(1, 3, 5, 7, 8, 9), List(2, 3, 5, 8, 9), 
+                         List(1, 4, 8, 9), List(1, 2, 5, 8), List(1, 2, 4, 5, 8, 9)))
+  
+  val test_expand_out = List(List(List(List(1), List(3, 4, 5), List(3, 4, 7, 9), List(3, 5, 6, 8), List(3, 4, 5, 8, 9), List(3, 4, 5, 6, 8, 9), List(2), List(3, 6, 8), List(4, 6, 7, 8)), List(List(3, 4, 5), List(8), List(3), List(1, 2, 3, 5, 6), List(1, 3, 4, 5), List(7), List(1, 3, 4), List(9), List(1, 4, 6)), List(List(6), List(3, 4), List(2), List(1, 3, 8), List(1, 3, 4, 8, 9), List(3, 4, 8, 9), List(5), List(1, 3, 8), List(1, 4, 7, 8)), List(List(2, 3, 4, 5, 8, 9), List(7), List(1, 3, 4, 8, 9), List(3, 5, 8), List(6), List(3, 4, 5, 8), List(1, 3, 8, 9), List(1, 2, 3, 5, 8), List(1, 2, 5, 8, 9)), List(List(2, 3, 4, 5, 8), List(2, 3, 4, 5, 6), List(3, 4, 8), List(9), List(3, 4, 5, 7, 8), List(1), List(3, 7, 8), List(2, 3, 5, 6, 8), List(2, 5, 6, 7, 8)), List(List(3, 5, 8, 9), List(1, 3, 5, 6), List(1, 3, 8, 9), List(3, 5, 7, 8), List(2), List(3, 5, 8), List(1, 3, 7, 8, 9), List(4), List(1, 5, 6, 7, 8, 9)), List(List(2, 4, 7, 8), List(1, 2, 4), List(5), List(1, 2, 7, 8), List(1, 7, 8, 9), List(2, 8, 9), List(6), List(1, 2, 8), List(3)), List(List(2, 3, 8), List(9), List(1, 3, 8), List(4), List(1, 3, 5, 8), List(2, 3, 5, 6, 8), List(1, 8), List(7), List(1, 2, 5, 8)), List(List(2, 3, 4, 7, 8), List(1, 2, 3, 4), List(6), List(1, 2, 3, 5, 7, 8), List(1, 3, 5, 7, 8, 9), List(2, 3, 5, 8, 9), List(1, 4, 8, 9), List(1, 2, 5, 8), List(1, 2, 4, 5, 8, 9))),
+                             List(List(List(1), List(3, 4, 5), List(3, 4, 7, 9), List(3, 5, 6, 8), List(3, 4, 5, 8, 9), List(3, 4, 5, 6, 8, 9), List(2), List(3, 6, 8), List(4, 6, 7, 8)), List(List(3, 4, 5), List(8), List(4), List(1, 2, 3, 5, 6), List(1, 3, 4, 5), List(7), List(1, 3, 4), List(9), List(1, 4, 6)), List(List(6), List(3, 4), List(2), List(1, 3, 8), List(1, 3, 4, 8, 9), List(3, 4, 8, 9), List(5), List(1, 3, 8), List(1, 4, 7, 8)), List(List(2, 3, 4, 5, 8, 9), List(7), List(1, 3, 4, 8, 9), List(3, 5, 8), List(6), List(3, 4, 5, 8), List(1, 3, 8, 9), List(1, 2, 3, 5, 8), List(1, 2, 5, 8, 9)), List(List(2, 3, 4, 5, 8), List(2, 3, 4, 5, 6), List(3, 4, 8), List(9), List(3, 4, 5, 7, 8), List(1), List(3, 7, 8), List(2, 3, 5, 6, 8), List(2, 5, 6, 7, 8)), List(List(3, 5, 8, 9), List(1, 3, 5, 6), List(1, 3, 8, 9), List(3, 5, 7, 8), List(2), List(3, 5, 8), List(1, 3, 7, 8, 9), List(4), List(1, 5, 6, 7, 8, 9)), List(List(2, 4, 7, 8), List(1, 2, 4), List(5), List(1, 2, 7, 8), List(1, 7, 8, 9), List(2, 8, 9), List(6), List(1, 2, 8), List(3)), List(List(2, 3, 8), List(9), List(1, 3, 8), List(4), List(1, 3, 5, 8), List(2, 3, 5, 6, 8), List(1, 8), List(7), List(1, 2, 5, 8)), List(List(2, 3, 4, 7, 8), List(1, 2, 3, 4), List(6), List(1, 2, 3, 5, 7, 8), List(1, 3, 5, 7, 8, 9), List(2, 3, 5, 8, 9), List(1, 4, 8, 9), List(1, 2, 5, 8), List(1, 2, 4, 5, 8, 9))))
+    
   test("Group Test") {
     val obtained = group(List(1, 2, 3, 4, 5, 6, 7, 8, 9))
     val expected = List(List(1, 2, 3), List(4, 5, 6), List(7, 8, 9))
@@ -268,5 +307,11 @@ class MySuite extends munit.FunSuite {
   test("Blocked Test #2") {
     val obtained = blocked(test_choices_board)
     assert(obtained)
+  }
+
+  test("Expand Test #1") {
+    val obtained = expand(test_expand.map(_.map(_.map(_.toString().head))))
+    val expected = test_expand_out.map(_.map(_.map(_.map(_.toString().head))))
+    assertEquals(obtained, expected)
   }
 }
