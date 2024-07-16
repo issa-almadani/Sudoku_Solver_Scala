@@ -176,12 +176,28 @@ def safe(cm: Matrix[Choices]): Boolean = rows(cm).forall((c: List[Choices]) => n
 def void(cm: Matrix[Choices]): Boolean = cm.exists(_.exists(_.isEmpty))
 
 
+/** This function checks for matrices that are blocked and cannot produce a solution
+ *
+ *  @cm: Matrix of choices to check 
+ *  @return: boolean representing if the matrix is blocked
+ */
 def blocked(cm: Matrix[Choices]): Boolean = void(cm) || !safe(cm)
 
 
+/** This helper function returns the length of the entry with the minimum number of choices in the matrix
+ *
+ *  @cm: Matrix of choices to find minimum entry in
+ *  @return: Length of minimum list entry
+ */
 def minchoice(cm: Matrix[Choices]): Int = ungroup(cm.map(_.map(_.length))).filter(_ > 1).min
 
 
+/** This function expands a matrix into a list of matrices by expanding the list of choices that
+ *  has the minimum length in the matrix, replacing it with multiple matrices of fixed entries
+ *
+ *  @cm: Matrix of choices to expand
+ *  @return: List of matrices expanded at minimum choice entry
+ */
 def expand(cm: Matrix[Choices]): List[Matrix[Choices]] = 
     val n = minchoice(cm)
 
@@ -191,9 +207,11 @@ def expand(cm: Matrix[Choices]): List[Matrix[Choices]] =
     for (c <- cs) yield rows1:::List(row1:::List(c)::row2):::rows2
   
 
-def mcp_new(matrix: Matrix[Choices]): List[Matrix[Choices]] = ungroup(expand(matrix).map(mcp_new))
-
-
+/** This function recursively prunes and searches for solutions for a given matrix of choices and returns a list of them, if any
+ *
+ *  @cm: Matrix of choices to solve
+ *  @return: List of matrices that are potential solutions
+ */
 def search(cm: Matrix[Choices]): List[Matrix[Choices]] = 
     if blocked(cm) then Nil 
     else if cm.forall(_.forall(single)) then List(cm)
@@ -276,9 +294,11 @@ def showBoard(board: Board) = board.zipWithIndex.foreach { case (row, idx) =>
         val x = sudoku_v3(board)
 
         println(s"\n Solutions Found: ${x.length}\n")
-        println("Sample Solution:")
 
-        showBoard(x.head)
+        if (x.length > 0)
+          println("Sample Solution:")
+          showBoard(x.head)
+
     } else {
 
     }
